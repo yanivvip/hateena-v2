@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0f1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bills">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<title>Bills</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- LOGIN -->
+  <div id="screen-login" class="screen active">
+    <div class="login-bg">
+      <div class="login-orb login-orb-1"></div>
+      <div class="login-orb login-orb-2"></div>
+    </div>
+    <div class="login-content">
+      <div class="login-logo">
+        <div class="logo-icon" style="background:none;padding:0;overflow:hidden;border-radius:18px">
+          <img src="/icons/icon-192.png" alt="Bills" style="width:72px;height:72px;border-radius:18px;object-fit:cover;display:block">
+        </div>
+        <h1>Bills</h1>
+        <p>דיווח מונים חודשי</p>
+      </div>
+      <div class="login-card">
+        <div class="form-group">
+          <label>אימייל</label>
+          <input type="email" id="login-email" placeholder="your@email.com" autocomplete="email" inputmode="email">
+        </div>
+        <div class="form-group">
+          <label>סיסמה</label>
+          <div style="position:relative">
+            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" style="padding-left:40px">
+            <button type="button" onclick="togglePassword()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:18px;padding:0;display:flex;align-items:center" aria-label="הצג/הסתר סיסמה">
+              <i class="ti ti-eye" id="eye-icon"></i>
+            </button>
+          </div>
+        </div>
+        <div id="login-error" class="error-msg hidden"></div>
+        <button class="btn-primary" id="login-btn" onclick="loginUser()">
+          <span id="login-btn-text">כניסה</span>
+          <span id="login-btn-spinner" class="btn-spinner hidden"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="screen-app" class="screen hidden">
+
+    <div class="topbar">
+      <div class="topbar-right">
+        <div class="user-badge" id="user-badge">י</div>
+        <div>
+          <div class="topbar-title">התאנה 163 – דיווח מונים חודשי</div>
+          <div class="topbar-sub" id="topbar-role">מנהל</div>
+        </div>
+      </div>
+      <div class="topbar-left">
+        <button class="icon-btn" onclick="hardRefresh()" aria-label="רענון" title="רענן לגרסה העדכנית">
+          <i class="ti ti-refresh"></i>
+        </button>
+        <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" aria-label="החלף תצוגה" title="החלף תצוגה כהה/בהירה">
+          <i class="ti ti-moon" id="theme-icon"></i>
+        </button>
+        <button class="icon-btn" id="notif-btn" onclick="showNotifications()" aria-label="התראות" title="התראות">
+          <i class="ti ti-bell"></i>
+          <span class="notif-dot hidden" id="notif-dot"></span>
+        </button>
+        <button class="icon-btn" onclick="logoutUser()" aria-label="יציאה" title="יציאה מהמערכת">
+          <i class="ti ti-logout"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="page-home"     class="page active"></div>
+    <div id="page-meter"   class="page hidden"></div>
+    <div id="page-calc"    class="page hidden"></div>
+    <div id="page-history" class="page hidden"></div>
+    <div id="page-settings"class="page hidden"></div>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" onclick="showPage('home')"     data-page="home">
+        <i class="ti ti-home-2"></i><span>ראשי</span>
+      </button>
+      <button class="nav-btn" onclick="showPage('meter')"  data-page="meter">
+        <i class="ti ti-gauge"></i><span>מונים</span>
+      </button>
+      <button class="nav-btn admin-only hidden" onclick="showPage('calc')" data-page="calc">
+        <i class="ti ti-calculator"></i><span>חישוב</span>
+      </button>
+      <button class="nav-btn" onclick="showPage('history')" data-page="history">
+        <i class="ti ti-chart-bar"></i><span>היסטוריה</span>
+      </button>
+      <button class="nav-btn admin-only hidden" onclick="showPage('settings')" data-page="settings">
+        <i class="ti ti-settings"></i><span>הגדרות</span>
+      </button>
+    </nav>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button class="modal-close" onclick="closeModal()" aria-label="סגור"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('mGOnSglK3GGKpdxVI');</script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
